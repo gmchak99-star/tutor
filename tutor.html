@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>실전영어 AI 코치 & 무한 섀도잉 트레이너</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 12px 10px 120px; background: #f8fafc; color: #0f172a; margin: 0; }
+    h2 { text-align: center; font-size: 1.3rem; margin: 8px 0 4px; color: #0f172a; }
+    .sub-title { text-align: center; font-size: 0.82rem; color: #64748b; margin-bottom: 12px; }
+
+    /* API 설정 및 상단 바 */
+    .top-bar { background: #0f172a; color: white; padding: 10px 14px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .api-badge { font-size: 0.8rem; display: flex; align-items: center; gap: 6px; }
+    .btn-key { background: #38bdf8; color: #0f172a; border: none; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 0.78rem; cursor: pointer; }
+
+    /* 주제 선택 칩 */
+    .topic-wrap { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 12px; }
+    .topic-btn { flex-shrink: 0; background: white; border: 1.5px solid #cbd5e1; border-radius: 20px; padding: 8px 14px; font-size: 0.82rem; font-weight: 700; color: #334155; cursor: pointer; }
+    .topic-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+    /* 상단 재생 제어 패널 */
+    .control-panel { background: #e0f2fe; border: 1px solid #bae6fd; padding: 10px 12px; border-radius: 8px; font-size: 0.82rem; color: #0369a1; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .ctrl-options { display: flex; align-items: center; gap: 8px; }
+
+    /* 대화창 영역 */
+    #chat-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+    .msg-card { background: white; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+    
+    /* AI 질문 카드 */
+    .ai-bubble { border-left: 4px solid #2563eb; }
+    .ai-title { font-size: 0.8rem; font-weight: 800; color: #2563eb; margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .ai-en-q { font-size: 1.05rem; font-weight: 700; color: #0f172a; line-height: 1.45; margin-bottom: 6px; }
+    .ai-ko-q { font-size: 0.86rem; color: #64748b; margin-bottom: 10px; line-height: 1.4; }
+    .hint-box { background: #f1f5f9; border-radius: 6px; padding: 8px 10px; font-size: 0.8rem; color: #475569; margin-top: 8px; }
+    .hint-box b { color: #0f172a; }
+
+    /* 내 답변 카드 */
+    .user-bubble { background: #f8fafc; border-left: 4px solid #64748b; margin-left: 10px; }
+    .user-tag { font-size: 0.78rem; font-weight: bold; color: #475569; margin-bottom: 4px; }
+    .user-text { font-size: 0.95rem; color: #1e293b; font-weight: 600; }
+
+    /* AI 피드백 및 교정 카드 */
+    .feedback-bubble { background: #ffffff; border: 2px solid #38bdf8; border-radius: 10px; padding: 14px; }
+    .fb-header { font-size: 0.85rem; font-weight: 800; color: #0284c7; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    
+    .correction-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+    .corr-label { font-size: 0.75rem; font-weight: 800; color: #166534; margin-bottom: 4px; }
+    .corr-en { font-size: 1.05rem; font-weight: 700; color: #15803d; line-height: 1.4; margin-bottom: 4px; }
+    .corr-ko { font-size: 0.86rem; font-weight: 600; color: #374151; }
+
+    .grammar-note { background: #fefce8; border: 1px solid #fef08a; border-radius: 6px; padding: 9px 11px; font-size: 0.82rem; color: #854d0e; line-height: 1.5; margin-bottom: 10px; }
+
+    /* 버튼군 */
+    .btn-row { display: flex; gap: 5px; align-items: center; justify-content: flex-end; flex-wrap: wrap; margin-top: 8px; }
+    .ctrl-btn { border: none; border-radius: 5px; padding: 7px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+    .opt-btn { background: white; border: 1px solid #cbd5e1; color: #334155; }
+    .btn-play { background: #2563eb; color: white; }
+    .btn-stop { background: #ef4444; color: white; }
+    .btn-save { background: #f59e0b; color: white; }
+    .status-text { font-size: 0.78rem; color: #059669; font-weight: bold; min-width: 65px; text-align: right; }
+
+    /* 하단 고정 입력 바 */
+    .input-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; padding: 10px 12px; display: flex; gap: 8px; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.06); z-index: 1000; }
+    .chat-input { flex: 1; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; }
+    .chat-input:focus { border-color: #2563eb; }
+    .btn-mic { background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px 13px; font-size: 1.1rem; cursor: pointer; }
+    .btn-mic.recording { background: #fee2e2; border-color: #ef4444; color: #dc2626; animation: pulse 1.2s infinite; }
+    .btn-send { background: #2563eb; color: white; border: none; border-radius: 8px; padding: 12px 16px; font-weight: 800; font-size: 0.95rem; cursor: pointer; }
+
+    /* 플로팅 절전 버튼 */
+    #floating-lock-btn { position: fixed; bottom: 75px; right: 14px; padding: 10px 14px; border-radius: 30px; background: #0f172a; border: 2px solid #22c55e; color: #22c55e; font-size: 0.85rem; font-weight: 800; cursor: pointer; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+    /* OLED 절전 암전 커튼 */
+    #dark-curtain { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000000; z-index: 1000000; color: #10b981; flex-direction: column; justify-content: center; align-items: center; user-select: none; }
+    .dark-counter { font-size: 2.2rem; font-weight: 800; margin: 12px 0; color: #22c55e; }
+    .dark-msg { font-size: 0.85rem; color: #475569; text-align: center; line-height: 1.5; }
+
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+  <h2>🎙️ 실전영어 AI 코치 & 무한 섀도잉</h2>
+  <div class="sub-title">실시간 영어 대화 · 틀린 문장 교정 · 핵심 구동사 설명 · 1,000회 섀도잉 루프</div>
+
+  <!-- 상단 API 키 관리 바 -->
+  <div class="top-bar">
+    <div class="api-badge">
+      <span>🤖 AI 엔진:</span>
+      <span id="api-status-text" style="color:#38bdf8; font-weight:bold;">체험 모드 (API 키 미등록)</span>
+    </div>
+    <button class="btn-key" onclick="promptApiKey()">🔑 Gemini API 키 등록</button>
+  </div>
+
+  <!-- 대화 주제 선택 바 -->
+  <div class="topic-wrap">
+    <button class="topic-btn active" onclick="setTopic('guesthouse')">🏠 펜션 손님 응대</button>
+    <button class="topic-btn" onclick="setTopic('fitness')">💪 헬스 & 웨이트</button>
+    <button class="topic-btn" onclick="setTopic('diet')">🥗 체지방 감량 & 식단</button>
+    <button class="topic-btn" onclick="setTopic('freediving')">🤿 프리다이빙</button>
+    <button class="topic-btn" onclick="setTopic('swimming')">🏊 수영 훈련</button>
+  </div>
+
+  <!-- 상단 반복 및 PiP 제어 바 -->
+  <div class="control-panel">
+    <span id="sys-status">엔진 탑재 대기 중...</span>
+    <div class="ctrl-options">
+      <label style="font-weight: bold; color: #0f172a;">반복 횟수:
+        <select id="repeat-select" style="padding: 3px 6px; border-radius: 4px; font-weight: bold;">
+          <option value="10">10회</option>
+          <option value="50">50회</option>
+          <option value="100" selected>100회</option>
+          <option value="500">500회</option>
+          <option value="1000">1000회 (체화)</option>
+        </select>
+      </label>
+      <button class="ctrl-btn" style="background:#7c3aed; color:white;" onclick="togglePiP()">📺 팝업(PiP)</button>
+    </div>
+  </div>
+
+  <canvas id="pip-canvas" width="400" height="250" style="display:none;"></canvas>
+  <video id="pip-video" playsinline muted autoplay style="width:1px; height:1px; opacity:0.01; position:absolute;"></video>
+
+  <!-- 대화 및 교정 카드 출력 창 -->
+  <div id="chat-container"></div>
+
+  <!-- 플로팅 화면 끄기(절전) 버튼 -->
+  <button id="floating-lock-btn" onclick="activateLockScreen()">🔒 화면 끄기 (절전)</button>
+
+  <!-- 하단 텍스트 및 마이크 입력 폼 -->
+  <div class="input-bar">
+    <button class="btn-mic" id="mic-btn" onclick="toggleSTT()" title="음성 마이크 입력">🎙️</button>
+    <input type="text" id="user-input" class="chat-input" placeholder="영어로 대답해보세요 (모르면 콩글리시도 OK)..." onkeydown="if(event.key==='Enter') sendUserReply()">
+    <button class="btn-send" id="send-btn" onclick="sendUserReply()">전송</button>
+  </div>
+
+  <!-- OLED 암전 커튼 -->
+  <div id="dark-curtain" onclick="handleCurtainTap()">
+    <div style="font-size: 0.95rem; color: #64748b; padding: 0 20px; text-align: center;" id="dark-text">대화 재생 대기 중...</div>
+    <div class="dark-counter" id="dark-count">0 / 100</div>
+    <div class="dark-msg">화면이 절전(오터치 방지 잠금) 상태입니다.<br>화면을 빠르게 <b>두 번(더블 탭)</b> 두드리면 돌아옵니다.</div>
+  </div>
+
+  <script>
+    // 1. 상태 변수 및 환경
+    let GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || "";
+    let currentTopic = 'guesthouse';
+    let conversationHistory = [];
+    let isStopped = false;
+    let loopTimeout = null;
+    let lastTapTime = 0;
+    let maleVoice = null;
+    let femaleVoice = null;
+    let recognition = null;
+    let isRecording = false;
+
+    // 2. 주제별 첫 질문 & 학습 목표 세팅 (자료 기반)
+    const topicPrompts = {
+      guesthouse: {
+        title: "펜션 체크인 & 손님 응대",
+        en: "Good afternoon! A foreign guest just arrived at your guesthouse and asks: 'Hi, we'd like to check in, but is it too early?' How would you welcome them and let them know you can take care of their luggage?",
+        ko: "외국인 손님이 도착해서 '체크인하고 싶은데 너무 이른가요?'라고 물어봅니다. 방이 준비되는 동안 짐을 맡아주겠다고 친절하게 환영해 보세요.",
+        hints: "take care of (맡아주다, 처리하다) / put down (내려놓다) / get ready (준비되다)"
+      },
+      fitness: {
+        title: "헬스장 기구 공유 & 운동 루틴",
+        en: "Someone at the gym asks: 'Excuse me, how many sets do you have left on the squat rack?' How would you tell them you have 2 sets left and offer to share the rack?",
+        ko: "헬스장에서 다른 회원이 '스쿼트 랙 몇 세트 남으셨나요?'라고 묻습니다. 2세트 남았으니 같이 번갈아 가며 쓰자고 영어로 답해 보세요.",
+        hints: "work in (중간에 같이 끼어서 쓰다) / have ~ left (~가 남다) / spot (뒤에서 자세 봐주다)"
+      },
+      diet: {
+        title: "체지방 감량 & 식단 관리",
+        en: "Your workout buddy asks: 'How did you lose so much body fat recently?' Explain that you cut down on carbs and started eating clean protein and beef.",
+        ko: "운동 동료가 '최근에 체지방을 어떻게 그렇게 많이 뺐어?'라고 묻습니다. 탄수화물을 대폭 줄이고 깨끗한 단백질과 소고기 위주로 챙겨 먹었다고 답해 보세요.",
+        hints: "cut down on (줄이다) / stick to (고수하다, 지키다) / drop body fat (체지방을 감량하다)"
+      },
+      freediving: {
+        title: "프리다이빙 수심 & 이퀄라이징",
+        en: "Your dive buddy asks: 'Did you have any trouble equalizing when you dove past fifteen meters?' How would you explain how your ears felt?",
+        ko: "다이빙 버디가 '15미터 넘게 내려갔을 때 귀 이퀄라이징 괜찮았어?'라고 물어봅니다. 문제없이 부드럽게 잘 되었다고 답해 보세요.",
+        hints: "hold one's breath (숨을 참다) / clear one's ears (이퀄라이징하다) / feel relaxed (긴장이 풀리다)"
+      },
+      swimming: {
+        title: "수영 페이스 조절 & 훈련",
+        en: "Your friend asks: 'Why do you prefer swimming early in the morning before work?' How would you explain your routine?",
+        ko: "친구가 '너는 왜 출근 전 이른 아침에 수영하는 걸 좋아해?'라고 묻습니다. 하루를 상쾌하게 시작할 수 있고 레인이 한산해서 좋다고 답해 보세요.",
+        hints: "start fresh (상쾌하게 시작하다) / clear one's head (머리를 맑게 하다) / lane (수영 레인)"
+      }
+    };
+
+    function updateApiStatus() {
+      const label = document.getElementById('api-status-text');
+      if (GEMINI_API_KEY) {
+        label.innerText = "Gemini Pro 실시간 연결됨 🟢";
+        label.style.color = "#4ade80";
+      } else {
+        label.innerText = "체험 모드 (API 키 미등록) ⚪";
+        label.style.color = "#94a3b8";
+      }
+    }
+
+    function promptApiKey() {
+      const key = prompt("Google AI Studio (aistudio.google.com)에서 발급받은 무료 Gemini API Key를 입력하세요:\n(입력 즉시 브라우저에 안전하게 저장됩니다)", GEMINI_API_KEY);
+      if (key !== null) {
+        GEMINI_API_KEY = key.trim();
+        localStorage.setItem('gemini_api_key', GEMINI_API_KEY);
+        updateApiStatus();
+        alert(GEMINI_API_KEY ? "API 키가 저장되었습니다. 실시간 AI 교정이 작동합니다!" : "API 키가 초기화되었습니다. 기본 체험 모드로 동작합니다.");
+      }
+    }
+
+    // 3. 음성 합성(TTS) 초기화
+    function initVoices() {
+      const v = window.speechSynthesis.getVoices();
+      if (!v || v.length === 0) return;
+      const en = v.filter(x => x.lang.startsWith('en'));
+      maleVoice = en.find(x => /male|david|guy|george/i.test(x.name)) || en[0];
+      femaleVoice = en.find(x => /female|zira|susan|jenny|samantha/i.test(x.name)) || en[en.length - 1] || en[0];
+      
+      const sys = document.getElementById('sys-status');
+      if (sys) {
+        sys.innerText = "원어민 음성 엔진 준비 완료 (" + (maleVoice ? maleVoice.name : "미국 엔진") + ")";
+        sys.style.color = "#047857";
+      }
+    }
+    window.speechSynthesis.onvoiceschanged = initVoices;
+    initVoices();
+
+    // 4. 음성 인식(STT) 세팅
+    function initSTT() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
+      recognition = new SpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        isRecording = true;
+        document.getElementById('mic-btn').classList.add('recording');
+      };
+      recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        document.getElementById('user-input').value = text;
+      };
+      recognition.onend = () => {
+        isRecording = false;
+        document.getElementById('mic-btn').classList.remove('recording');
+      };
+      recognition.onerror = () => {
+        isRecording = false;
+        document.getElementById('mic-btn').classList.remove('recording');
+      };
+    }
+    initSTT();
+
+    function toggleSTT() {
+      if (!recognition) {
+        alert("현재 브라우저에서 마이크 음성 인식을 지원하지 않습니다. (크롬 브라우저 권장)");
+        return;
+      }
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    }
+
+    // 5. 주제 선택 및 초기 대화 렌더링
+    function setTopic(topicKey) {
+      currentTopic = topicKey;
+      document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const chat = document.getElementById('chat-container');
+      chat.innerHTML = "";
+      conversationHistory = [];
+
+      const p = topicPrompts[topicKey];
+      conversationHistory.push({ role: "model", text: p.en });
+
+      const card = document.createElement('div');
+      card.className = "msg-card ai-bubble";
+      card.innerHTML = `
+        <div class="ai-title">
+          <span>🤖 AI Coach [${p.title}]</span>
+          <button class="ctrl-btn btn-play" style="padding:4px 8px; font-size:0.75rem;" onclick="playAudio('${p.en.replace(/'/g, "\\'")}', 'st_init', 'g_init', 'sp_init')">▶ 질문 듣기</button>
+        </div>
+        <div class="ai-en-q">"${p.en}"</div>
+        <div class="ai-ko-q">🇰🇷 ${p.ko}</div>
+        <div class="hint-box">💡 <b>활용 구동사 / 표현:</b> ${p.hints}</div>
+        <div class="btn-row" style="margin-top:6px;">
+          <button class="ctrl-btn opt-btn" id="g_init" data-gender="female" onclick="toggleGender(this)">👩 여성</button>
+          <button class="ctrl-btn opt-btn" id="sp_init" data-speed="0.85" onclick="cycleSpeed(this)">⚡ 0.85x</button>
+          <span class="status-text" id="st_init"></span>
+        </div>
+      `;
+      chat.appendChild(card);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    // 6. 사용자 답변 전송 및 AI 피드백 호출
+    async function sendUserReply() {
+      const input = document.getElementById('user-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      input.value = "";
+      const chat = document.getElementById('chat-container');
+
+      // 사용자 말풍선 추가
+      const uCard = document.createElement('div');
+      uCard.className = "msg-card user-bubble";
+      uCard.innerHTML = `<div class="user-tag">👤 내 답변:</div><div class="user-text">${text}</div>`;
+      chat.appendChild(uCard);
+      conversationHistory.push({ role: "user", text: text });
+
+      // 로딩 표시
+      const loadCard = document.createElement('div');
+      loadCard.className = "msg-card feedback-bubble";
+      loadCard.id = "loading-card";
+      loadCard.innerHTML = `<div style="color:#0284c7; font-weight:bold;">🤖 AI 코치가 문법을 분석하고 교정 중입니다...</div>`;
+      chat.appendChild(loadCard);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+      // AI 피드백 생성
+      if (GEMINI_API_KEY) {
+        await callGeminiFeedback(text);
+      } else {
+        setTimeout(() => simulateFeedback(text), 700);
+      }
+    }
+
+    // Gemini API 호출 로직
+    async function callGeminiFeedback(userReply) {
+      const systemInstruction = `
+        당신은 실전 영어회화 전문 원어민 코치입니다.
+        사용자의 최근 대답을 보고 다음 형식의 JSON으로만 정확히 반환하세요:
+        {
+          "corrected_en": "원어민이 실전에서 쓰는 가장 자연스럽고 교정된 영어 문장",
+          "corrected_ko": "교정된 문장의 정확한 한국어 번역 (자연스러운 구어체)",
+          "grammar_notes": "틀린 부분 지적 및 핵심 구동사(Phrasal verb)나 문법 설명 (친절한 한글 설명)",
+          "next_question_en": "대화를 이어갈 원어민 코치의 다음 영어 질문 1개",
+          "next_question_ko": "다음 영어 질문의 한국어 뜻"
+        }
+      `;
+
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              { role: "user", parts: [{ text: `주제: ${currentTopic}\n대화 내역: ${JSON.stringify(conversationHistory)}\n사용자의 마지막 발화: "${userReply}"\n위 지침에 맞춰 교정 JSON을 작성하세요.` }] }
+            ],
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
+
+        const data = await res.json();
+        const output = JSON.parse(data.candidates[0].content.parts[0].text);
+        renderFeedback(output);
+      } catch (err) {
+        alert("Gemini 통신 오류가 발생하여 체험 모드로 표시합니다: " + err.message);
+        simulateFeedback(userReply);
+      }
+    }
+
+    // 오프라인 / API 미등록 시 시뮬레이션 모드
+    function simulateFeedback(userReply) {
+      const fallback = {
+        corrected_en: "Sure thing! Your room isn't ready just yet, but you can put down your bags here and I'll take care of them.",
+        corrected_ko: "물론이죠! 방이 아직 준비되진 않았지만, 가방은 여기 내려놓으시면 제가 잘 맡아드릴게요.",
+        grammar_notes: "💡 'put down ~(내려놓다)'과 'take care of ~(맡아주다, 처리하다)' 구동사를 활용해 원어민처럼 훨씬 부드러운 서비스 영어를 구사할 수 있습니다.",
+        next_question_en: "Would you like me to recommend a nice nearby coffee shop while you wait?",
+        next_question_ko: "기다리시는 동안 근처에 분위기 좋은 카페 하나 추천해 드릴까요?"
+      };
+      renderFeedback(fallback);
+    }
+
+    // 7. 교정 결과 카드 렌더링 & 무한 섀도잉 루프 장착
+    function renderFeedback(data) {
+      const load = document.getElementById('loading-card');
+      if (load) load.remove();
+
+      const chat = document.getElementById('chat-container');
+      const idx = new Date().getTime();
+      const sid = `st_${idx}`;
+      const gid = `gid_${idx}`;
+      const spid = `spid_${idx}`;
+      const cleanEn = data.corrected_en.replace(/'/g, "\\'");
+
+      const fCard = document.createElement('div');
+      fCard.className = "msg-card feedback-bubble";
+      fCard.innerHTML = `
+        <div class="fb-header">✨ AI 코치의 실전 교정 & 구동사 해설</div>
+        
+        <div class="correction-box">
+          <div class="corr-label">🇺🇸 자연스러운 원어민 교정 (섀도잉 추천):</div>
+          <div class="corr-en">${data.corrected_en}</div>
+          <div class="corr-ko">🇰🇷 ${data.corrected_ko}</div>
+        </div>
+
+        <div class="grammar-note">${data.grammar_notes}</div>
+
+        <div class="btn-row">
+          <button class="ctrl-btn opt-btn" id="${gid}" data-gender="male" onclick="toggleGender(this)">👨 남성</button>
+          <button class="ctrl-btn opt-btn" id="${spid}" data-speed="0.85" onclick="cycleSpeed(this)">⚡ 0.85x</button>
+          <button class="ctrl-btn btn-play" onclick="playAudio('${cleanEn}', '${sid}', '${gid}', '${spid}')">▶ 이 문장 섀도잉 반복</button>
+          <button class="ctrl-btn btn-stop" onclick="stopAudio('${sid}')">정지</button>
+          <span class="status-text" id="${sid}"></span>
+        </div>
+
+        <hr style="border:none; border-top:1px dashed #cbd5e1; margin:14px 0;">
+
+        <div style="font-size:0.85rem; font-weight:bold; color:#2563eb; margin-bottom:4px;">💬 이어서 말해보기:</div>
+        <div style="font-size:0.98rem; font-weight:700; color:#0f172a; margin-bottom:4px;">"${data.next_question_en}"</div>
+        <div style="font-size:0.85rem; color:#64748b; margin-bottom:8px;">🇰🇷 ${data.next_question_ko}</div>
+      `;
+
+      chat.appendChild(fCard);
+      conversationHistory.push({ role: "model", text: data.next_question_en });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    // 8. 무한 섀도잉 오디오 플레이어 엔진 (기존 엔진 계승)
+    const silenceAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+    silenceAudio.loop = true;
+
+    // PiP 캔버스
+    const canvas = document.getElementById('pip-canvas');
+    const ctx = canvas.getContext('2d');
+    const video = document.getElementById('pip-video');
+
+    function updateCanvas(text, count, maxCount) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText('AI 실전영어 섀도잉', 20, 45);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '16px sans-serif';
+      const words = (text || '').split(' ');
+      let line = '';
+      let y = 90;
+      for (let w of words) {
+        if ((line + w).length > 28) {
+          ctx.fillText(line, 20, y);
+          line = w + ' ';
+          y += 26;
+        } else {
+          line += w + ' ';
+        }
+      }
+      ctx.fillText(line, 20, y);
+
+      ctx.fillStyle = '#4ade80';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(count ? `${count} / ${maxCount}회` : '준비 완료', 20, 215);
+    }
+    updateCanvas("Ready", 0, 100);
+
+    try {
+      const stream = canvas.captureStream(15);
+      video.srcObject = stream;
+    } catch(e) {}
+
+    async function togglePiP() {
+      try {
+        await video.play();
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else if (document.pictureInPictureEnabled) {
+          await video.requestPictureInPicture();
+        }
+      } catch (err) {
+        alert("먼저 문장의 [▶ 섀도잉 반복] 버튼을 누른 다음 PiP 버튼을 눌러주세요.");
+      }
+    }
+
+    async function lockScreenWake() {
+      if ('wakeLock' in navigator) {
+        try { await navigator.wakeLock.request('screen'); } catch(e) {}
+      }
+    }
+
+    const speedCycle = [0.85, 1.0, 1.25, 0.75];
+    function cycleSpeed(btn) {
+      let cur = parseFloat(btn.dataset.speed || "0.85");
+      let nextIdx = (speedCycle.indexOf(cur) + 1) % speedCycle.length;
+      let nextSpeed = speedCycle[nextIdx];
+      btn.dataset.speed = nextSpeed.toString();
+      btn.innerText = "⚡ " + nextSpeed + "x";
+    }
+
+    function toggleGender(btn) {
+      if (btn.dataset.gender === 'male') {
+        btn.dataset.gender = 'female';
+        btn.innerText = '👩 여성';
+      } else {
+        btn.dataset.gender = 'male';
+        btn.innerText = '👨 남성';
+      }
+    }
+
+    function playAudio(text, statusId, gid, spid) {
+      window.speechSynthesis.cancel();
+      clearTimeout(loopTimeout);
+      window.speechSynthesis.resume();
+
+      video.play().catch(() => {});
+      silenceAudio.play().catch(() => {});
+      lockScreenWake();
+
+      isStopped = false;
+      let count = 0;
+      const maxCount = parseInt(document.getElementById('repeat-select').value) || 100;
+      const statusElem = document.getElementById(statusId);
+      const gender = document.getElementById(gid).dataset.gender;
+      const speed = parseFloat(document.getElementById(spid).dataset.speed);
+      const voice = (gender === 'female') ? femaleVoice : maleVoice;
+      const pitchValue = (gender === 'female') ? 1.05 : 0.95;
+
+      document.getElementById('dark-text').innerText = text;
+
+      function loop() {
+        if (isStopped || count >= maxCount) {
+          if (!isStopped && statusElem) {
+            statusElem.innerText = `${maxCount}회 완료`;
+            document.getElementById('dark-count').innerText = `${maxCount}회 완료`;
+            updateCanvas(text, maxCount, maxCount);
+            silenceAudio.pause();
+          }
+          return;
+        }
+
+        count++;
+        if (statusElem) statusElem.innerText = `${count} / ${maxCount}회`;
+        document.getElementById('dark-count').innerText = `${count} / ${maxCount}`;
+        updateCanvas(text, count, maxCount);
+
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'en-US';
+        if (voice) utter.voice = voice;
+        utter.pitch = pitchValue;
+        utter.rate = speed;
+
+        utter.onend = function() {
+          if (!isStopped && count < maxCount) {
+            const pauseTime = Math.max(400, Math.floor(750 / speed));
+            loopTimeout = setTimeout(loop, pauseTime);
+          } else if (count >= maxCount) {
+            if (statusElem) statusElem.innerText = `${maxCount}회 완료`;
+            document.getElementById('dark-count').innerText = `${maxCount}회 완료`;
+            updateCanvas(text, maxCount, maxCount);
+            silenceAudio.pause();
+          }
+        };
+
+        utter.onerror = function() {
+          if (!isStopped && count < maxCount) {
+            loopTimeout = setTimeout(loop, 600);
+          }
+        };
+
+        window.speechSynthesis.speak(utter);
+      }
+
+      loop();
+    }
+
+    function stopAudio(statusId) {
+      isStopped = true;
+      clearTimeout(loopTimeout);
+      window.speechSynthesis.cancel();
+      silenceAudio.pause();
+      if (statusId && document.getElementById(statusId)) {
+        document.getElementById(statusId).innerText = "정지됨";
+      }
+      document.getElementById('dark-count').innerText = "정지됨";
+      updateCanvas("정지됨", 0, 100);
+    }
+
+    // OLED 절전 모드
+    function activateLockScreen() {
+      document.getElementById('dark-curtain').style.display = 'flex';
+      lockScreenWake();
+    }
+
+    function handleCurtainTap() {
+      const now = new Date().getTime();
+      if (now - lastTapTime < 350) {
+        document.getElementById('dark-curtain').style.display = 'none';
+      }
+      lastTapTime = now;
+    }
+
+    // 시작 시 첫 화면 렌더링
+    updateApiStatus();
+    setTopic('guesthouse');
+  </script>
+</body>
+</html>
