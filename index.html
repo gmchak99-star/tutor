@@ -9,6 +9,7 @@
       --bg: #0f172a;
       --card-bg: #1e293b;
       --accent: #2563eb;
+      --accent-hover: #1d4ed8;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --stop-red: #ef4444;
@@ -41,7 +42,7 @@
     /* 상단 네비게이션 헤더 */
     header {
       flex-shrink: 0;
-      height: 50px;
+      height: 48px;
       padding: 0 12px;
       background: #1e293b;
       border-bottom: 1px solid #334155;
@@ -49,12 +50,12 @@
       justify-content: space-between;
       align-items: center;
     }
-    .header-title { font-size: 0.95rem; font-weight: 800; color: #38bdf8; }
+    .header-title { font-size: 0.92rem; font-weight: 800; color: #38bdf8; }
     .header-btns { display: flex; gap: 6px; }
     .btn-top {
       padding: 6px 10px;
       border-radius: 6px;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       border: none;
       cursor: pointer;
@@ -62,13 +63,13 @@
     .btn-stop-all { background: var(--stop-red); color: white; }
     .btn-dark { background: #334155; color: #cbd5e1; }
 
-    /* 대화 영역 (60% 높이 차지) */
+    /* 대화 영역 (속도감 최적화) */
     #chat-scroll-area {
       flex: 6;
       min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding: 12px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -82,22 +83,22 @@
     .msg-coach { border-left: 4px solid #38bdf8; }
     .msg-user { border-left: 4px solid #10b981; background: #132e2b; }
     .msg-role { 
-      font-size: 0.75rem; 
+      font-size: 0.72rem; 
       font-weight: 800; 
-      margin-bottom: 6px; 
+      margin-bottom: 4px; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
     }
     .msg-coach .msg-role { color: #38bdf8; }
     .msg-user .msg-role { color: #34d399; }
-    .msg-body { font-size: 0.9rem; line-height: 1.45; word-break: keep-all; }
+    .msg-body { font-size: 0.9rem; line-height: 1.4; word-break: keep-all; }
     .grammar-tip {
-      margin-top: 8px;
-      padding: 8px 10px;
+      margin-top: 6px;
+      padding: 6px 8px;
       background: #0f172a;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #cbd5e1;
       border: 1px dashed #475569;
     }
@@ -109,12 +110,12 @@
       border: none;
       border-radius: 4px;
       padding: 3px 6px;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       cursor: pointer;
     }
 
-    /* 하단 섀도잉 집중 훈련소 (30% 높이) */
+    /* 하단 섀도잉 집중 훈련소 */
     #loop-vault-section {
       flex: 4;
       min-height: 0;
@@ -125,7 +126,7 @@
       padding: 8px 12px;
     }
     .vault-title {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 800;
       color: #fbbf24;
       display: flex;
@@ -148,18 +149,18 @@
       border: none; 
       padding: 4px 7px; 
       border-radius: 4px; 
-      font-size: 0.72rem; 
+      font-size: 0.7rem; 
       font-weight: 700; 
       cursor: pointer; 
     }
-    .loop-status { font-size: 0.72rem; color: #10b981; font-weight: 700; margin-left: auto; }
+    .loop-status { font-size: 0.7rem; color: #10b981; font-weight: 700; margin-left: auto; }
 
-    /* 화면 하단 입력바 (잘림 방지 전용 래퍼) */
+    /* 화면 하단 일체형 입력바 */
     footer {
       flex-shrink: 0;
       background: #1e293b;
       border-top: 1px solid #334155;
-      padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 10px));
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 8px));
     }
     .input-wrapper {
       display: flex;
@@ -181,7 +182,6 @@
       flex-shrink: 0;
       cursor: pointer;
     }
-    /* 입력창 + 전송버튼을 일체형 캡슐로 묶어 화면 밖 이탈 방지 */
     .input-box-container {
       flex: 1;
       min-width: 0;
@@ -216,6 +216,32 @@
       white-space: nowrap;
     }
 
+    /* 초기 오디오 언락 배너 */
+    #start-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      text-align: center;
+    }
+    .btn-start-action {
+      background: #2563eb;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 16px 28px;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
     /* 절전 암전 커튼 */
     #dark-curtain {
       display: none;
@@ -237,19 +263,24 @@
 <body>
 
 <div id="app-container">
-  <!-- 상단 네비게이션 헤더 -->
+  <!-- 모바일 오디오 잠금 해제 오버레이 -->
+  <div id="start-overlay">
+    <div style="font-size:1.8rem; margin-bottom:10px;">🎙️</div>
+    <h2 style="font-size:1.2rem; color:#38bdf8; margin-bottom:8px;">실전영어 AI 트레이너</h2>
+    <p style="font-size:0.85rem; color:#94a3b8; line-height:1.5;">모바일 브라우저의 소리 출력을 위해<br>아래 버튼을 눌러 첫 질문을 들어보세요.</p>
+    <button class="btn-start-action" onclick="initFirstGreeting()">🚀 실전 대화 시작하기</button>
+  </div>
+
   <header>
     <div class="header-title">🎙️ 실전영어 AI 코치</div>
     <div class="header-btns">
-      <button class="btn-top btn-stop-all" onclick="stopAllSpeech()">⏹️ 긴급정지</button>
+      <button class="btn-top btn-stop-all" onclick="stopAllSpeech()">⏹️ 정지</button>
       <button class="btn-top btn-dark" onclick="openDarkCurtain()">🌙 화면끄기</button>
     </div>
   </header>
 
-  <!-- 대화 영역 -->
   <div id="chat-scroll-area"></div>
 
-  <!-- 하단 섀도잉 집중 훈련소 -->
   <div id="loop-vault-section">
     <div class="vault-title">
       <span>🔥 문장 무한 섀도잉 집중 훈련소</span>
@@ -258,19 +289,17 @@
     <div id="vault-list"></div>
   </div>
 
-  <!-- 하단 고정 입력바 (일체형 전송 버튼) -->
   <footer>
     <div class="input-wrapper">
-      <button class="btn-mic" id="mic-btn" onclick="toggleSTT()" title="음성 말하기">🎤</button>
+      <button class="btn-mic" id="mic-btn" onclick="handleMicClick()" title="음성 말하기">🎤</button>
       <div class="input-box-container">
-        <input type="text" id="user-input" placeholder="영어나 콩글리시로 대답..." onfocus="stopAllSpeech()" onkeypress="if(event.key==='Enter') sendUserReply()">
-        <button class="btn-send-inside" onclick="sendUserReply()">전송</button>
+        <input type="text" id="user-input" placeholder="영어나 콩글리시로 대답..." onfocus="stopAllSpeech()" onkeypress="if(event.key==='Enter') handleSendClick()">
+        <button class="btn-send-inside" onclick="handleSendClick()">전송</button>
       </div>
     </div>
   </footer>
 </div>
 
-<!-- 절전 암전 커튼 -->
 <div id="dark-curtain" onclick="handleCurtainTap()">
   <div style="font-size: 0.9rem; color: #64748b; padding: 0 20px; text-align: center;" id="dark-sentence">무한 섀도잉 절전 모드</div>
   <div class="dark-num" id="dark-count">0 / 10</div>
@@ -287,6 +316,13 @@
   let recognition = null;
   let isListening = false;
 
+  // 진동 피드백 유틸리티
+  function triggerHaptic(duration = 40) {
+    if ("vibrate" in navigator) {
+      navigator.vibrate(duration);
+    }
+  }
+
   function stopAllSpeech(statusId = null) {
     isLoopActive = false;
     clearTimeout(loopTimeout);
@@ -300,10 +336,11 @@
 
   function speakOnce(text, statusId = null) {
     stopAllSpeech();
+    window.speechSynthesis.resume();
     const cleanText = text.replace(/freediving/gi, "free diving");
     const u = new SpeechSynthesisUtterance(cleanText);
     u.lang = 'en-US';
-    u.rate = 0.88;
+    u.rate = 0.92;
     currentUtterance = u;
     if (statusId && document.getElementById(statusId)) {
       document.getElementById(statusId).innerText = "재생 중";
@@ -335,16 +372,16 @@
 
       const u = new SpeechSynthesisUtterance(cleanText);
       u.lang = 'en-US';
-      u.rate = 0.88;
+      u.rate = 0.92;
       currentUtterance = u;
       u.onend = () => {
         if (isLoopActive && count < maxCount) {
-          loopTimeout = setTimeout(loop, 800);
+          loopTimeout = setTimeout(loop, 700);
         } else if (count >= maxCount && statusId && document.getElementById(statusId)) {
           document.getElementById(statusId).innerText = "완료";
         }
       };
-      u.onerror = () => { if (isLoopActive) loopTimeout = setTimeout(loop, 500); };
+      u.onerror = () => { if (isLoopActive) loopTimeout = setTimeout(loop, 400); };
       window.speechSynthesis.speak(u);
     }
     loop();
@@ -403,39 +440,57 @@
     list.prepend(card);
   }
 
+  // 초고속 최적화 API 호출
   async function callGemini(promptText) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${HARDCODED_API_KEY}`;
     const systemPrompt = `당신은 실전 영어회화 전문 코치입니다.
 사용자 관심사: 헬스, 체지방 감량, 프리다이빙, 펜션 운영, 외국인 손님 응대, 수영.
-자연스러운 원어민 구동사(check in, check out, deal with, take care of 등)를 주로 사용하여 피드백하세요.
+자연스러운 원어민 구동사(check in, check out, deal with, take care of 등)를 주로 사용하여 핵심만 간결하고 명확하게 피드백하세요.
 응답은 반드시 아래 JSON 형식으로만 작성하세요:
 {
   "correction": "사용자 발화 교정 문장 (영어)",
-  "korean": "교정 문장의 자연스러운 한국어 번역",
-  "explanation": "핵심 구동사 및 문법 설명 (한국어 1~2줄)",
+  "korean": "교정 문장 한국어 번역",
+  "explanation": "핵심 구동사 및 문법 설명 (한국어 1줄)",
   "next_question_en": "다음 대화를 이어갈 영어 질문 1문장",
-  "next_question_ko": "다음 영어 질문의 한국어 번역"
+  "next_question_ko": "다음 영어 질문 한국어 번역"
 }`;
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          { role: "user", parts: [{ text: systemPrompt + "\n\n사용자 발화: " + promptText }] }
-        ]
-      })
-    });
-    
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error?.message || "Gemini API 호출에 실패했습니다.");
-    }
+    const candidateUrls = [
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${HARDCODED_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${HARDCODED_API_KEY}`
+    ];
 
-    const data = await res.json();
-    const raw = data.candidates[0].content.parts[0].text;
-    const clean = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
-    return JSON.parse(clean);
+    let lastError = null;
+    for (const url of candidateUrls) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              { role: "user", parts: [{ text: systemPrompt + "\n\n사용자 발화: " + promptText }] }
+            ]
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const raw = data.candidates[0].content.parts[0].text;
+          const clean = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+          return JSON.parse(clean);
+        } else {
+          const errData = await res.json();
+          lastError = new Error(errData.error?.message || "호출 실패");
+        }
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    throw lastError || new Error("Gemini API 호출에 실패했습니다.");
+  }
+
+  function handleSendClick() {
+    triggerHaptic(50);
+    sendUserReply();
   }
 
   async function sendUserReply() {
@@ -469,6 +524,11 @@
     } catch (e) {
       alert("오류 발생: " + e.message);
     }
+  }
+
+  function handleMicClick() {
+    triggerHaptic(40);
+    toggleSTT();
   }
 
   function toggleSTT() {
@@ -511,14 +571,19 @@
     lastTapTime = now;
   }
 
-  window.onload = () => {
+  // 모바일 오디오 언락 및 첫 발화 실행
+  function initFirstGreeting() {
+    triggerHaptic(40);
+    document.getElementById('start-overlay').style.display = 'none';
+    
+    // 첫 질문 텍스트 및 음성 출력
     addCoachMessage(`
       <b>Welcome to Real-English Training!</b><br>
       게스트하우스에 외국인 손님이 방금 도착했습니다.<br>
       <i>"Hi, we’d like to check in, but is it too early?"</i><br>
       방이 준비되었거나 짐을 먼저 맡아주겠다고 편하게 영어로 답해보세요!
     `, "Hi, we would like to check in, but is it too early?");
-  };
+  }
 </script>
 </body>
 </html>
