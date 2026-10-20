@@ -9,13 +9,10 @@
       --bg: #0f172a;
       --card-bg: #1e293b;
       --accent: #2563eb;
-      --accent-hover: #1d4ed8;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --stop-red: #ef4444;
       --green: #10b981;
-      --footer-h: 70px;
-      --header-h: 52px;
     }
     * { 
       box-sizing: border-box; 
@@ -26,37 +23,34 @@
     html, body {
       width: 100%;
       height: 100%;
-      overflow: hidden;
       background-color: var(--bg);
       color: var(--text);
+      overflow: hidden;
     }
 
-    /* 상단 네비게이션 헤더 (상단 고정) */
+    #app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      height: 100dvh;
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* 상단 네비게이션 헤더 */
     header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: var(--header-h);
-      padding: 0 14px;
+      flex-shrink: 0;
+      height: 50px;
+      padding: 0 12px;
       background: #1e293b;
       border-bottom: 1px solid #334155;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 100;
     }
-    .header-title { 
-      font-size: 0.95rem; 
-      font-weight: 800; 
-      color: #38bdf8; 
-      white-space: nowrap; 
-    }
-    .header-btns { 
-      display: flex; 
-      gap: 6px; 
-      align-items: center; 
-    }
+    .header-title { font-size: 0.95rem; font-weight: 800; color: #38bdf8; }
+    .header-btns { display: flex; gap: 6px; }
     .btn-top {
       padding: 6px 10px;
       border-radius: 6px;
@@ -68,23 +62,10 @@
     .btn-stop-all { background: var(--stop-red); color: white; }
     .btn-dark { background: #334155; color: #cbd5e1; }
 
-    /* 메인 콘텐츠 컨테이너 (헤더와 푸터 사이 공간 채움) */
-    #main-content {
-      position: fixed;
-      top: var(--header-h);
-      bottom: calc(var(--footer-h) + env(safe-area-inset-bottom, 0px));
-      left: 0;
-      right: 0;
-      display: flex;
-      flex-direction: column;
-      max-width: 768px;
-      margin: 0 auto;
-      overflow: hidden;
-    }
-
-    /* 1. 상단: 대화 스크롤 영역 */
+    /* 대화 영역 (60% 높이 차지) */
     #chat-scroll-area {
       flex: 6;
+      min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       padding: 12px;
@@ -96,7 +77,6 @@
       background: var(--card-bg);
       border-radius: 10px;
       padding: 10px 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
       border: 1px solid #334155;
     }
     .msg-coach { border-left: 4px solid #38bdf8; }
@@ -111,11 +91,7 @@
     }
     .msg-coach .msg-role { color: #38bdf8; }
     .msg-user .msg-role { color: #34d399; }
-    .msg-body { 
-      font-size: 0.9rem; 
-      line-height: 1.45; 
-      word-break: keep-all; 
-    }
+    .msg-body { font-size: 0.9rem; line-height: 1.45; word-break: keep-all; }
     .grammar-tip {
       margin-top: 8px;
       padding: 8px 10px;
@@ -127,7 +103,6 @@
     }
     .grammar-tip b { color: #fbbf24; }
 
-    /* 개별 문장 정지 버튼 */
     .btn-inline-stop {
       background: var(--stop-red);
       color: white;
@@ -139,23 +114,23 @@
       cursor: pointer;
     }
 
-    /* 2. 하단: 무한 섀도잉 집중 훈련소 */
+    /* 하단 섀도잉 집중 훈련소 (30% 높이) */
     #loop-vault-section {
       flex: 4;
+      min-height: 0;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       background: #090d16;
       border-top: 2px solid #334155;
-      padding: 10px 12px;
+      padding: 8px 12px;
     }
     .vault-title {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 800;
       color: #fbbf24;
       display: flex;
       justify-content: space-between;
       margin-bottom: 6px;
-      align-items: center;
     }
     .loop-card {
       background: #1e293b;
@@ -164,14 +139,9 @@
       padding: 8px 10px;
       margin-bottom: 6px;
     }
-    .loop-en { font-size: 0.9rem; font-weight: 700; color: #38bdf8; }
-    .loop-ko { font-size: 0.78rem; color: #94a3b8; margin: 2px 0 6px 0; }
-    .loop-actions { 
-      display: flex; 
-      gap: 5px; 
-      align-items: center; 
-      flex-wrap: wrap; 
-    }
+    .loop-en { font-size: 0.88rem; font-weight: 700; color: #38bdf8; }
+    .loop-ko { font-size: 0.75rem; color: #94a3b8; margin: 2px 0 6px 0; }
+    .loop-actions { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
     .btn-rep { 
       background: var(--accent); 
       color: white; 
@@ -182,73 +152,71 @@
       font-weight: 700; 
       cursor: pointer; 
     }
-    .loop-status { 
-      font-size: 0.72rem; 
-      color: #10b981; 
-      font-weight: 700; 
-      margin-left: auto; 
-    }
+    .loop-status { font-size: 0.72rem; color: #10b981; font-weight: 700; margin-left: auto; }
 
-    /* 하단 입력바 (화면 하단 무조건 고정 - 절대로 숨겨지지 않음) */
+    /* 화면 하단 입력바 (잘림 방지 전용 래퍼) */
     footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: calc(var(--footer-h) + env(safe-area-inset-bottom, 0px));
-      padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+      flex-shrink: 0;
       background: #1e293b;
       border-top: 1px solid #334155;
-      z-index: 100;
-      display: flex;
-      justify-content: center;
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 10px));
     }
-    .input-bar {
-      width: 100%;
-      max-width: 768px;
+    .input-wrapper {
       display: flex;
-      gap: 6px;
       align-items: center;
+      gap: 6px;
+      width: 100%;
     }
-    #user-input {
-      flex: 1;
-      height: 44px;
-      padding: 0 12px;
-      background: #0f172a;
+    .btn-mic {
+      width: 42px;
+      height: 42px;
+      background: #334155;
       border: 1px solid #475569;
       border-radius: 8px;
+      font-size: 1rem;
       color: white;
-      font-size: 0.9rem;
-    }
-    #user-input:focus { outline: 2px solid var(--accent); }
-    .btn-send { 
-      height: 44px;
-      background: var(--accent); 
-      color: white; 
-      border: none; 
-      padding: 0 16px; 
-      border-radius: 8px; 
-      font-weight: 700; 
-      font-size: 0.88rem; 
-      cursor: pointer; 
-      white-space: nowrap;
-    }
-    .btn-mic { 
-      height: 44px;
-      width: 44px;
-      background: #334155; 
-      color: white; 
-      border: 1px solid #475569; 
-      border-radius: 8px; 
-      font-size: 1rem; 
-      cursor: pointer; 
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      cursor: pointer;
+    }
+    /* 입력창 + 전송버튼을 일체형 캡슐로 묶어 화면 밖 이탈 방지 */
+    .input-box-container {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 2px 4px 2px 10px;
+    }
+    #user-input {
+      flex: 1;
+      min-width: 0;
+      height: 38px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 0.88rem;
+    }
+    .btn-send-inside {
+      height: 34px;
+      padding: 0 12px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
-    /* 절전 암전 모드 커튼 */
+    /* 절전 암전 커튼 */
     #dark-curtain {
       display: none;
       position: fixed;
@@ -268,42 +236,46 @@
 </head>
 <body>
 
+<div id="app-container">
   <!-- 상단 네비게이션 헤더 -->
   <header>
     <div class="header-title">🎙️ 실전영어 AI 코치</div>
     <div class="header-btns">
-      <button class="btn-top btn-stop-all" onclick="stopAllSpeech()">⏹️ 정지</button>
+      <button class="btn-top btn-stop-all" onclick="stopAllSpeech()">⏹️ 긴급정지</button>
       <button class="btn-top btn-dark" onclick="openDarkCurtain()">🌙 화면끄기</button>
     </div>
   </header>
 
-  <!-- 메인 스크롤 영역 -->
-  <div id="main-content">
-    <div id="chat-scroll-area"></div>
-    <div id="loop-vault-section">
-      <div class="vault-title">
-        <span>🔥 문장 무한 섀도잉 집중 훈련소</span>
-        <span style="font-size: 0.7rem; color: #94a3b8;">문장별 정지 완비</span>
-      </div>
-      <div id="vault-list"></div>
+  <!-- 대화 영역 -->
+  <div id="chat-scroll-area"></div>
+
+  <!-- 하단 섀도잉 집중 훈련소 -->
+  <div id="loop-vault-section">
+    <div class="vault-title">
+      <span>🔥 문장 무한 섀도잉 집중 훈련소</span>
+      <span style="font-size: 0.7rem; color: #94a3b8;">문장별 정지 완비</span>
     </div>
+    <div id="vault-list"></div>
   </div>
 
-  <!-- 하단 고정 입력바 (스마트폰에서 절대 안 사라짐) -->
+  <!-- 하단 고정 입력바 (일체형 전송 버튼) -->
   <footer>
-    <div class="input-bar">
+    <div class="input-wrapper">
       <button class="btn-mic" id="mic-btn" onclick="toggleSTT()" title="음성 말하기">🎤</button>
-      <input type="text" id="user-input" placeholder="영어나 콩글리시로 대답해 보세요..." onfocus="stopAllSpeech()" onkeypress="if(event.key==='Enter') sendUserReply()">
-      <button class="btn-send" onclick="sendUserReply()">전송</button>
+      <div class="input-box-container">
+        <input type="text" id="user-input" placeholder="영어나 콩글리시로 대답..." onfocus="stopAllSpeech()" onkeypress="if(event.key==='Enter') sendUserReply()">
+        <button class="btn-send-inside" onclick="sendUserReply()">전송</button>
+      </div>
     </div>
   </footer>
+</div>
 
-  <!-- 화면 절전 암전 커튼 -->
-  <div id="dark-curtain" onclick="handleCurtainTap()">
-    <div style="font-size: 0.9rem; color: #64748b; padding: 0 20px; text-align: center;" id="dark-sentence">무한 섀도잉 절전 모드</div>
-    <div class="dark-num" id="dark-count">0 / 10</div>
-    <div style="font-size: 0.8rem; color: #475569; text-align: center;">화면을 빠르게 <b>두 번 톡톡</b> 치면 복귀합니다.</div>
-  </div>
+<!-- 절전 암전 커튼 -->
+<div id="dark-curtain" onclick="handleCurtainTap()">
+  <div style="font-size: 0.9rem; color: #64748b; padding: 0 20px; text-align: center;" id="dark-sentence">무한 섀도잉 절전 모드</div>
+  <div class="dark-num" id="dark-count">0 / 10</div>
+  <div style="font-size: 0.8rem; color: #475569; text-align: center;">화면을 빠르게 <b>두 번 톡톡</b> 치면 복귀합니다.</div>
+</div>
 
 <script>
   const HARDCODED_API_KEY = "AQ.Ab8RN6LUfJtKLbWlytmxerLEtCkHT4R_F2g3rQMetz0Q414mYQ";
@@ -513,7 +485,7 @@
       recognition.onstart = () => {
         isListening = true;
         document.getElementById('mic-btn').innerText = "🔴";
-        document.getElementById('user-input').placeholder = "듣는 중입니다. 편하게 말씀하세요...";
+        document.getElementById('user-input').placeholder = "듣는 중입니다. 말씀하세요...";
       };
       recognition.onresult = (e) => {
         document.getElementById('user-input').value = e.results[0][0].transcript;
@@ -521,7 +493,7 @@
       recognition.onend = () => {
         isListening = false;
         document.getElementById('mic-btn').innerText = "🎤";
-        document.getElementById('user-input').placeholder = "영어나 콩글리시로 대답해 보세요...";
+        document.getElementById('user-input').placeholder = "영어나 콩글리시로 대답...";
       };
     }
     if (isListening) recognition.stop();
