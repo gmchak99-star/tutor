@@ -9,7 +9,6 @@
       --bg: #0f172a;
       --card-bg: #1e293b;
       --accent: #2563eb;
-      --accent-hover: #1d4ed8;
       --text: #f8fafc;
       --text-muted: #94a3b8;
       --stop-red: #ef4444;
@@ -63,7 +62,7 @@
     .btn-stop-all { background: var(--stop-red); color: white; }
     .btn-dark { background: #334155; color: #cbd5e1; }
 
-    /* 대화 영역 (속도감 최적화) */
+    /* 대화 영역 */
     #chat-scroll-area {
       flex: 6;
       min-height: 0;
@@ -263,11 +262,10 @@
 <body>
 
 <div id="app-container">
-  <!-- 모바일 오디오 잠금 해제 오버레이 -->
   <div id="start-overlay">
     <div style="font-size:1.8rem; margin-bottom:10px;">🎙️</div>
     <h2 style="font-size:1.2rem; color:#38bdf8; margin-bottom:8px;">실전영어 AI 트레이너</h2>
-    <p style="font-size:0.85rem; color:#94a3b8; line-height:1.5;">모바일 브라우저의 소리 출력을 위해<br>아래 버튼을 눌러 첫 질문을 들어보세요.</p>
+    <p style="font-size:0.85rem; color:#94a3b8; line-height:1.5;">모바일 브라우저 음성 재생을 위해<br>아래 버튼을 눌러 대화를 시작하세요.</p>
     <button class="btn-start-action" onclick="initFirstGreeting()">🚀 실전 대화 시작하기</button>
   </div>
 
@@ -316,7 +314,6 @@
   let recognition = null;
   let isListening = false;
 
-  // 진동 피드백 유틸리티
   function triggerHaptic(duration = 40) {
     if ("vibrate" in navigator) {
       navigator.vibrate(duration);
@@ -440,11 +437,11 @@
     list.prepend(card);
   }
 
-  // 초고속 최적화 API 호출
+  /* 안정적인 표준 API 엔드포인트 호출 (v1/models/gemini-1.5-flash 표준 지원) */
   async function callGemini(promptText) {
-    const systemPrompt = `당신은 실전 영어회화 전문 코치입니다.
+    const systemPrompt = `당신은 실전 영어회화 코치입니다.
 사용자 관심사: 헬스, 체지방 감량, 프리다이빙, 펜션 운영, 외국인 손님 응대, 수영.
-자연스러운 원어민 구동사(check in, check out, deal with, take care of 등)를 주로 사용하여 핵심만 간결하고 명확하게 피드백하세요.
+자연스러운 원어민 구동사(check in, check out, deal with, take care of 등)를 주로 사용하여 피드백하세요.
 응답은 반드시 아래 JSON 형식으로만 작성하세요:
 {
   "correction": "사용자 발화 교정 문장 (영어)",
@@ -455,8 +452,9 @@
 }`;
 
     const candidateUrls = [
+      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${HARDCODED_API_KEY}`,
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${HARDCODED_API_KEY}`,
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${HARDCODED_API_KEY}`
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${HARDCODED_API_KEY}`
     ];
 
     let lastError = null;
@@ -478,14 +476,14 @@
           const clean = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
           return JSON.parse(clean);
         } else {
-          const errData = await res.json();
-          lastError = new Error(errData.error?.message || "호출 실패");
+          const errData = await res.json().catch(() => ({}));
+          lastError = new Error(errData.error?.message || `서버 응답 오류 (HTTP ${res.status})`);
         }
       } catch (e) {
         lastError = e;
       }
     }
-    throw lastError || new Error("Gemini API 호출에 실패했습니다.");
+    throw lastError || new Error("Gemini API 서버에 연결할 수 없습니다.");
   }
 
   function handleSendClick() {
@@ -571,12 +569,9 @@
     lastTapTime = now;
   }
 
-  // 모바일 오디오 언락 및 첫 발화 실행
   function initFirstGreeting() {
     triggerHaptic(40);
     document.getElementById('start-overlay').style.display = 'none';
-    
-    // 첫 질문 텍스트 및 음성 출력
     addCoachMessage(`
       <b>Welcome to Real-English Training!</b><br>
       게스트하우스에 외국인 손님이 방금 도착했습니다.<br>
